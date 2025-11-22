@@ -82,7 +82,9 @@
       </div>
   </div>
 
-<script>
+<script type="module">
+import API_BASE_URL from "../js/config.js";
+
 const token = localStorage.getItem('token');
 if (!token) {
     alert('Please login first!');
@@ -96,7 +98,7 @@ const facultySelect = document.getElementById('facultySelect');
 // Load faculty for dropdown
 async function loadFaculty() {
     try {
-        const res = await fetch('http://localhost:5000/api/admin/all-faculty', {
+        const res = await fetch(`${API_BASE_URL}/api/admin/all-faculty`, {
             headers: { Authorization: `Bearer ${token}` }
         });
         if (!res.ok) throw new Error('Failed to fetch faculty');
@@ -116,7 +118,7 @@ async function loadFaculty() {
 // Load timetable
 async function loadTimetable() {
     try {
-        const res = await fetch('http://localhost:5000/api/admin/all-timetable', {
+        const res = await fetch(`${API_BASE_URL}/api/admin/all-timetable`, {
             headers: { Authorization: `Bearer ${token}` }
         });
         if (!res.ok) throw new Error('Failed to fetch timetable');
@@ -154,19 +156,17 @@ lectureForm.addEventListener('submit', async e => {
         const subject = document.getElementById('subjectInput').value;
         const day = document.getElementById('daySelect').value;
         const time = document.getElementById('timeInput').value;
-
         const semester = document.getElementById('semesterSelect').value;
-const course = document.getElementById('courseInput').value;
+        const course = document.getElementById('courseInput').value;
 
-const res = await fetch('http://localhost:5000/api/admin/add-timetable', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`
-  },
-  body: JSON.stringify({ facultyId, facultyName, subject, day, time, semester, course })
-});
-
+        const res = await fetch(`${API_BASE_URL}/api/admin/add-timetable`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({ facultyId, facultyName, subject, day, time, semester, course })
+        });
 
         if (!res.ok) throw new Error('Failed to add lecture');
         const data = await res.json();
@@ -188,7 +188,7 @@ function attachDeleteHandlers() {
             if (!confirm('Are you sure you want to delete this lecture?')) return;
 
             try {
-                const res = await fetch(`http://localhost:5000/api/admin/delete-timetable/${id}`, {
+                const res = await fetch(`${API_BASE_URL}/api/admin/delete-timetable/${id}`, {
                     method: 'DELETE',
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -207,8 +207,8 @@ function attachDeleteHandlers() {
 // Initial load
 loadFaculty();
 loadTimetable();
-
 </script>
+
 
 </body>
 </html>

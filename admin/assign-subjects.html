@@ -88,7 +88,9 @@
 
   </div>
 
-<script>
+<script type="module">
+import API_BASE_URL from "../config.js";
+
 const token = localStorage.getItem('token');
 if(!token) window.location.href='../index.html';
 
@@ -110,17 +112,17 @@ assignBtn.addEventListener("click", async () => {
   }
 
   try {
-    const res = await fetch("http://localhost:5000/api/admin/assign-student", {
+    const res = await fetch(`${API_BASE_URL}/api/admin/assign-student`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`
       },
       body: JSON.stringify({
-        name: name,
-        rollNo: roll,          // 🔥 Correct field for backend
-        semester: semester,
-        subjects: subjects
+        name,
+        rollNo: roll,
+        semester,
+        subjects
       })
     });
 
@@ -134,13 +136,9 @@ assignBtn.addEventListener("click", async () => {
   }
 });
 
-
-// Load assigned students
 function loadAssignedStudents() {
-  fetch("http://localhost:5000/api/admin/assigned-students", {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
+  fetch(`${API_BASE_URL}/api/admin/assigned-students`, {
+    headers: { Authorization: `Bearer ${token}` }
   })
     .then(res => res.json())
     .then(data => {
@@ -148,16 +146,15 @@ function loadAssignedStudents() {
 
       if (data.success && Array.isArray(data.assigned)) {
         data.assigned.forEach(s => {
-  const tr = document.createElement('tr');
-  tr.innerHTML = `
-    <td>${s.rollNo}</td>
-    <td>${s.name}</td>
-    <td>${s.semester}</td>
-    <td>${s.subjects?.join(', ') || ''}</td>
-  `;
-  assignedTable.appendChild(tr);
-});
-
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${s.rollNo}</td>
+            <td>${s.name}</td>
+            <td>${s.semester}</td>
+            <td>${s.subjects?.join(', ') || ''}</td>
+          `;
+          assignedTable.appendChild(tr);
+        });
       } else {
         assignedTable.innerHTML = `<tr><td colspan="4">No assigned students found</td></tr>`;
       }
