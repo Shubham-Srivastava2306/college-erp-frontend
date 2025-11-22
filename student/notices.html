@@ -85,7 +85,9 @@
         </div>
 
     </div>
-<script>
+<script type="module">
+import API_BASE_URL from "../js/config.js";
+
 const token = localStorage.getItem('token');
 if(!token){
   alert('Please login first!');
@@ -97,7 +99,7 @@ const noticeContainer = document.querySelector('.content');
 // Load notices dynamically
 async function loadNotices(){
   try{
-    const res = await fetch('http://localhost:5000/api/notice', {
+    const res = await fetch(`${API_BASE_URL}/api/notice`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     const data = await res.json();
@@ -127,6 +129,7 @@ async function loadNotices(){
 
 loadNotices();
 </script>
+
 
 </body>
 </html>

@@ -194,13 +194,15 @@ button:hover { background:#3b5bdb; }
   </div>
 </div>
 
-<script>
+<script type="module">
+import API_BASE_URL from "../js/config.js";
+
 const token = localStorage.getItem("token");
 
 // Attendance fetch logic
 document.getElementById("loadBtn").addEventListener("click", async () => {
   const subject = document.getElementById("subjectInput").value.trim();
-  let url = `http://localhost:5000/api/student/attendance`;
+  let url = `${API_BASE_URL}/api/student/attendance`;
   if(subject) url += `?subject=${subject}`;
   try {
     const res = await fetch(url, { headers:{ Authorization:`Bearer ${token}` }});
@@ -270,11 +272,7 @@ document.getElementById("loadBtn").addEventListener("click", async () => {
 const chatbotBubble = document.getElementById("chatbotBubble");
 const chatbotWindow = document.getElementById("chatbotWindow");
 chatbotBubble.addEventListener("click", () => {
-  if(chatbotWindow.style.display === "block"){
-    chatbotWindow.style.display = "none";
-  } else {
-    chatbotWindow.style.display = "block";
-  }
+  chatbotWindow.style.display = chatbotWindow.style.display === "block" ? "none" : "block";
 });
 
 // Chatbot send button logic
@@ -285,7 +283,7 @@ document.getElementById("chatSendBtn").addEventListener("click", async () => {
   addChatMessage("student", query);
 
   try {
-    const res = await fetch("http://localhost:5000/api/student/chatbot", {
+    const res = await fetch(`${API_BASE_URL}/api/student/chatbot`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -309,6 +307,7 @@ function addChatMessage(sender, text) {
   document.getElementById("chatMessages").scrollTop = document.getElementById("chatMessages").scrollHeight;
 }
 </script>
+
 
 </body>
 </html>

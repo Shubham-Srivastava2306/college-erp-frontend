@@ -105,7 +105,9 @@
         </table>
 
     </div>
-<script>
+<script type="module">
+import API_BASE_URL from "../js/config.js";
+
 const token = localStorage.getItem('token');
 if(!token){
     alert('Please login first!');
@@ -116,7 +118,7 @@ const scheduleTableBody = document.querySelector('tbody');
 
 async function loadSchedule(){
     try{
-        const res = await fetch('http://localhost:5000/api/faculty/lectures', {
+        const res = await fetch(`${API_BASE_URL}/api/faculty/lectures`, {
             headers: { Authorization: `Bearer ${token}` }
         });
         const data = await res.json();

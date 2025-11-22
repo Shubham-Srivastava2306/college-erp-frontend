@@ -49,12 +49,14 @@
         </div>
 
     </div>
-<script>
+<script type="module">
+import API_BASE_URL from "../js/config.js";
+
 const token = localStorage.getItem("token");
 
 async function loadFacultyName(){
   try {
-    const res = await fetch("http://localhost:5000/api/faculty/profile", {
+    const res = await fetch(`${API_BASE_URL}/api/faculty/profile`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     const data = await res.json();
@@ -71,5 +73,6 @@ async function loadFacultyName(){
 
 loadFacultyName();
 </script>
+
 </body>
 </html>

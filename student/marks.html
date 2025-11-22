@@ -246,7 +246,9 @@ td { color:#2f3640; }
   </div>
 </div>
 
-<script>
+<script type="module">
+import API_BASE_URL from "../js/config.js";
+
 const token = localStorage.getItem("token");
 
 document.getElementById("loadBtn").addEventListener("click", async () => {
@@ -258,7 +260,7 @@ document.getElementById("loadBtn").addEventListener("click", async () => {
     return;
   }
 
-  let url = `http://localhost:5000/api/student/marks/${examType}`;
+  let url = `${API_BASE_URL}/api/student/marks/${examType}`;
   if (subject) url += `/${subject}`;
 
   try {
@@ -314,6 +316,7 @@ document.getElementById("loadBtn").addEventListener("click", async () => {
     alert("Error fetching marks");
   }
 });
+
 function setQuery(text){
   document.getElementById("chatUserInput").value = text;
 }
@@ -331,7 +334,7 @@ document.getElementById("chatSendBtn").addEventListener("click", async () => {
   addChatMessage("student", query);
 
   try {
-    const res = await fetch("http://localhost:5000/api/student/chatbot", {
+    const res = await fetch(`${API_BASE_URL}/api/student/chatbot`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -355,5 +358,6 @@ function addChatMessage(sender, text) {
   document.getElementById("chatMessages").scrollTop = document.getElementById("chatMessages").scrollHeight;
 }
 </script>
+
 </body>
 </html>

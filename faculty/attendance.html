@@ -66,84 +66,84 @@
     <button class="submit-btn" id="submitAttendanceBtn">Submit Attendance</button>
   </div>
 
-  <script>
-    const subjectInput = document.getElementById('subjectInput');
-    const dateInput = document.getElementById('dateInput');
-    const loadStudentsBtn = document.getElementById('loadStudentsBtn');
-    const studentsTable = document.getElementById('studentsTable');
-    const submitAttendanceBtn = document.getElementById('submitAttendanceBtn');
+  <script type="module">
+import API_BASE_URL from "../js/config.js";
 
-    let students = [];
-    const token = localStorage.getItem('token'); // faculty login token
+const subjectInput = document.getElementById('subjectInput');
+const dateInput = document.getElementById('dateInput');
+const loadStudentsBtn = document.getElementById('loadStudentsBtn');
+const studentsTable = document.getElementById('studentsTable');
+const submitAttendanceBtn = document.getElementById('submitAttendanceBtn');
 
-    // 🔹 Load students by subject
-    loadStudentsBtn.addEventListener('click', async () => {
-      const subject = subjectInput.value.trim();
-      if (!subject) return alert("Enter subject");
+let students = [];
+const token = localStorage.getItem('token'); // faculty login token
 
-      try {
-        const res = await fetch(`http://localhost:5000/api/faculty/students/${subject}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const data = await res.json();
+// 🔹 Load students by subject
+loadStudentsBtn.addEventListener('click', async () => {
+  const subject = subjectInput.value.trim();
+  if (!subject) return alert("Enter subject");
 
-        if (data.success && data.students.length > 0) {
-          students = data.students;
-          studentsTable.innerHTML = '';
-          students.forEach((s, i) => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-              <td>${s.rollNo}</td>
-              <td>${s.name}</td>
-              <td><input type="radio" name="s${i}" value="present"></td>
-              <td><input type="radio" name="s${i}" value="absent" checked></td>
-            `;
-            studentsTable.appendChild(tr);
-          });
-        } else {
-          studentsTable.innerHTML = '<tr><td colspan="4">No students found</td></tr>';
-        }
-      } catch (err) {
-        console.error(err);
-        studentsTable.innerHTML = '<tr><td colspan="4">Error loading students</td></tr>';
-      }
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/faculty/students/${subject}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+
+    if (data.success && data.students.length > 0) {
+      students = data.students;
+      studentsTable.innerHTML = '';
+      students.forEach((s, i) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${s.rollNo}</td>
+          <td>${s.name}</td>
+          <td><input type="radio" name="s${i}" value="present"></td>
+          <td><input type="radio" name="s${i}" value="absent" checked></td>
+        `;
+        studentsTable.appendChild(tr);
+      });
+    } else {
+      studentsTable.innerHTML = '<tr><td colspan="4">No students found</td></tr>';
+    }
+  } catch (err) {
+    console.error(err);
+    studentsTable.innerHTML = '<tr><td colspan="4">Error loading students</td></tr>';
+  }
+});
+
+// 🔹 Submit attendance
+submitAttendanceBtn.addEventListener('click', async () => {
+  const subject = subjectInput.value.trim();
+  const date = dateInput.value;
+
+  if (!subject || !date) return alert("Fill all fields");
+
+  const attendance = students.map((s, i) => ({
+    studentId: s._id,
+    rollNo: s.rollNo,
+    status: document.querySelector(`input[name="s${i}"]:checked`)?.value || 'absent'
+  }));
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/faculty/attendance`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ subject, date, attendance })
     });
 
-    // 🔹 Submit attendance
-    submitAttendanceBtn.addEventListener('click', async () => {
-      const subject = subjectInput.value.trim();
-      const date = dateInput.value;
+    const data = await res.json();
+    alert(data.message);
 
-      if (!subject || !date) return alert("Fill all fields");
-
-      const attendance = students.map((s, i) => ({
-  studentId: s._id,
-  rollNo: s.rollNo,
-  status: document.querySelector(`input[name="s${i}"]:checked`)?.value || 'absent'
-}));
-
-
-      try {
-        const res = await fetch('http://localhost:5000/api/faculty/attendance', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({ subject, date, attendance })
-        });
-
-        const data = await res.json();
-        alert(data.message);
-
-        // Redirect to faculty dashboard on success
-        if(data.success) window.location.href = 'faculty-dashboard.html';
-      } catch (err) {
-        console.error(err);
-        alert("Error submitting attendance");
-      }
-    });
-  </script>
+    if(data.success) window.location.href = 'faculty-dashboard.html';
+  } catch (err) {
+    console.error(err);
+    alert("Error submitting attendance");
+  }
+});
+</script>
 
 </body>
 </html>

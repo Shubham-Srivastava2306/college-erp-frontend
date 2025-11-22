@@ -73,7 +73,9 @@
         <button class="submit-btn" id="submitMarksBtn">Submit Marks</button>
     </div>
 
-<script>
+<script type="module">
+import API_BASE_URL from "../js/config.js";
+
 const token = localStorage.getItem('token');
 if(!token){ alert('Please login first!'); window.location.href='../index.html'; }
 
@@ -89,7 +91,7 @@ loadStudentsBtn.addEventListener('click', async ()=>{
     if(!subject) return alert("Enter subject");
 
     try{
-        const res = await fetch(`http://localhost:5000/api/faculty/students/${subject}`, {
+        const res = await fetch(`${API_BASE_URL}/api/faculty/students/${subject}`, {
             headers: { Authorization: `Bearer ${token}` }
         });
         const data = await res.json();
@@ -123,7 +125,7 @@ submitBtn.addEventListener('click', async ()=>{
     if(marksData.length===0){ alert('Please enter marks for at least one student'); return; }
 
     try{
-        const res = await fetch('http://localhost:5000/api/faculty/marks', {
+        const res = await fetch(`${API_BASE_URL}/api/faculty/marks`, {
             method:'POST',
             headers:{ 'Content-Type':'application/json', Authorization: `Bearer ${token}` },
             body: JSON.stringify({ subject, examType, marks: marksData })
@@ -134,6 +136,7 @@ submitBtn.addEventListener('click', async ()=>{
     }catch(err){ alert('Error submitting marks: '+err.message); }
 });
 </script>
+
 
 </body>
 </html>
