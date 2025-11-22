@@ -172,3 +172,27 @@ button.delete:hover {
       width: 100%;
   }
 }
+
+/* Mobile: collapse sidebar and provide toggle */
+@media (max-width: 900px) {
+  body { display: block; }
+  /* hide sidebar by default to save space */
+  .sidebar { display: none; width: 100%; position: relative; height: auto; }
+  /* when body has class show-sidebar, reveal the sidebar */
+  body.show-sidebar .sidebar { display: block; }
+
+  /* make main content full width */
+  .content { margin-left: 0; width: 100%; padding: 16px; }
+
+  /* make cards responsive */
+  .cards-container, .cards { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
+  .card { width: 100%; max-width: 420px; margin: 0; }
+
+  /* small toggle button for opening sidebar */
+  #sidebarToggle { display: block; position: fixed; top: 12px; left: 12px; z-index: 1100; background: #1e1f26; color: #fff; border: none; padding: 8px 10px; border-radius: 6px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+}
+
+@media (max-width: 420px) {
+  #sidebarToggle { padding: 8px; font-size: 16px; }
+  .card h3 { font-size: 16px; }
+}
