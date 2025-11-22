@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Marks</title>
+  <link rel="stylesheet" href="faculty.css">
+
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f2f5; }
+    .sidebar { width: 220px; background: #4c6ef5; color: white; float: left; height: 100vh; padding: 20px; box-sizing: border-box; }
+    .sidebar h2 { margin-bottom: 20px; }
+    .sidebar a { display: block; color: white; text-decoration: none; margin: 10px 0; padding: 8px; border-radius: 5px; }
+    .sidebar a.active, .sidebar a:hover { background: #264de4; }
+    .content { margin-left: 240px; padding: 20px; }
+    .form-box { background: white; padding: 20px; border-radius: 10px; margin-bottom: 25px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); width: 100%; max-width: 700px; }
+    label { font-size: 15px; font-weight: 600; color: #333; }
+    input, select { width: 100%; padding: 10px; margin: 8px 0 15px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
+    th { background: #4c6ef5; color: white; padding: 10px; text-align: left; }
+    td { padding: 10px; border-bottom: 1px solid #eee; }
+    .submit-btn { padding: 12px 20px; background: #4c6ef5; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; margin-top: 15px; }
+    .submit-btn:hover { background: #264de4; }
+  </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>Faculty</h2>
+        <a href="faculty-dashboard.html">Dashboard</a>
+        <a href="attendance.html">Mark Attendance</a>
+        <a class="active" href="marks-upload.html">Upload Marks</a>
+        <a href="schedule.html">Lecture Schedule</a>
+        <a href="notices.html">Notices</a>
+        <a href="../login.html">Logout</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <h1>Upload Student Marks</h1>
+
+        <!-- Selection Section -->
+        <div class="form-box">
+            <label>Enter Subject</label>
+            <input type="text" id="subjectInput" placeholder="Enter Subject (e.g. DBMS)">
+
+            <label>Select Exam Type</label>
+            <select id="examSelect">
+                <option value="">Choose Exam</option>
+                <option value="Assignment">Assignment</option>
+                <option value="Mid-Term">Mid-Term</option>
+                <option value="Final">Final Exam</option>
+            </select>
+
+            <button id="loadStudentsBtn">Load Students</button>
+        </div>
+
+        <!-- Marks Table -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Roll No</th>
+                    <th>Name</th>
+                    <th>Marks</th>
+                </tr>
+            </thead>
+            <tbody id="studentsTable">
+                <tr><td colspan="3">Enter subject and click Load Students</td></tr>
+            </tbody>
+        </table>
+
+        <button class="submit-btn" id="submitMarksBtn">Submit Marks</button>
+    </div>
+
+<script>
+const token = localStorage.getItem('token');
+if(!token){ alert('Please login first!'); window.location.href='../login.html'; }
+
+const subjectInput = document.getElementById('subjectInput');
+const examSelect = document.getElementById('examSelect');
+const studentsTable = document.getElementById('studentsTable');
+const loadStudentsBtn = document.getElementById('loadStudentsBtn');
+const submitBtn = document.getElementById('submitMarksBtn');
+
+// 🔹 Load students by subject
+loadStudentsBtn.addEventListener('click', async ()=>{
+    const subject = subjectInput.value.trim();
+    if(!subject) return alert("Enter subject");
+
+    try{
+        const res = await fetch(`http://localhost:5000/api/faculty/students/${subject}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        studentsTable.innerHTML = '';
+        if(data.success && data.students.length > 0){
+            data.students.forEach((s,i)=>{
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${s.rollNo}</td><td>${s.name}</td><td><input type="number" placeholder="Enter marks" /></td>`;
+                studentsTable.appendChild(tr);
+            });
+        } else {
+            studentsTable.innerHTML = '<tr><td colspan="3">No students found</td></tr>';
+        }
+    }catch(err){ alert('Error loading students: '+err.message); }
+});
+
+// 🔹 Submit marks
+submitBtn.addEventListener('click', async ()=>{
+    const subject = subjectInput.value.trim();
+    const examType = examSelect.value;
+    if(!subject || !examType){ alert('Please enter subject and exam type'); return; }
+
+    const rows = document.querySelectorAll('#studentsTable tr');
+    const marksData = [];
+    rows.forEach(row=>{
+        const rollNo = row.children[0].textContent;
+        const marks = row.children[2].querySelector('input').value;
+        if(marks) marksData.push({ rollNo, marks });
+    });
+
+    if(marksData.length===0){ alert('Please enter marks for at least one student'); return; }
+
+    try{
+        const res = await fetch('http://localhost:5000/api/faculty/marks', {
+            method:'POST',
+            headers:{ 'Content-Type':'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ subject, examType, marks: marksData })
+        });
+        const data = await res.json();
+        alert(data.message);
+        if(data.success) window.location.href = 'faculty-dashboard.html';
+    }catch(err){ alert('Error submitting marks: '+err.message); }
+});
+</script>
+
+</body>
+</html>

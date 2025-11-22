@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assign Subjects to Students</title>
+  <link rel="stylesheet" href="admin.css">
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f2f5; margin: 0; }
+    .sidebar { width: 220px; background: #4c6ef5; color: white; float: left; height: 100vh; padding: 20px; box-sizing: border-box; }
+    .sidebar h2 { margin-bottom: 20px; }
+    .sidebar a { display: block; color: white; text-decoration: none; margin: 10px 0; padding: 8px; border-radius: 5px; }
+    .sidebar a.active, .sidebar a:hover { background: #264de4; }
+    .content { margin-left: 240px; padding: 20px; }
+    .form-box { background: white; padding: 20px; border-radius: 10px; margin-bottom: 25px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); width: 100%; max-width: 700px; }
+    label { font-size: 15px; font-weight: 600; color: #333; display: block; margin-top: 10px; }
+    input, select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; }
+    select[multiple] { height: 120px; }
+    button { padding: 12px 20px; background: #4c6ef5; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; margin-top: 15px; }
+    button:hover { background: #264de4; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 10px; border: 1px solid #eee; text-align: left; }
+    th { background: #4c6ef5; color: white; }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h2>Admin</h2>
+    <a href="admin-dashboard.html">Dashboard</a>
+    <a href="students.html">Manage Students</a>
+    <a href="faculty.html">Manage Faculty</a>
+    <a href="assign-subjects.html" class="active">Assign Subjects</a>
+    <a href="../login.html">Logout</a>
+  </div>
+
+  <div class="content">
+    <h1>Assign Subjects to Students</h1>
+
+    <div class="form-box">
+      <label>Student Name</label>
+      <input type="text" id="studentName" placeholder="Enter Student Name">
+
+      <label>Roll Number</label>
+      <input type="text" id="studentRoll" placeholder="Enter Roll Number">
+
+      <label>Semester</label>
+      <select id="semesterSelect">
+        <option value="">Choose Semester</option>
+        <option value="1">Sem 1</option>
+        <option value="2">Sem 2</option>
+        <option value="3">Sem 3</option>
+        <option value="4">Sem 4</option>
+        <option value="5">Sem 5</option>
+        <option value="6">Sem 6</option>
+        <option value="7">Sem 7</option>
+        <option value="8">Sem 8</option>
+      </select>
+
+      <label>Subjects</label>
+      <select id="subjectSelect" multiple>
+        <option>Data Structures</option>
+        <option>DBMS</option>
+        <option>Operating Systems</option>
+        <option>Computer Networks</option>
+        <option>Software Engineering</option>
+      </select>
+
+      <button id="assignBtn">Assign Subjects</button>
+    </div>
+
+    <div class="assigned-list">
+      <h3>Assigned Students</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Roll No</th>
+            <th>Name</th>
+            <th>Semester</th>
+            <th>Subjects</th>
+          </tr>
+        </thead>
+        <tbody id="assignedTable">
+          <!-- assigned students will appear here -->
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+<script>
+const token = localStorage.getItem('token');
+if(!token) window.location.href='../login.html';
+
+const studentNameInput = document.getElementById('studentName');
+const studentRollInput = document.getElementById('studentRoll');
+const semesterSelect = document.getElementById('semesterSelect');
+const subjectSelect = document.getElementById('subjectSelect');
+const assignBtn = document.getElementById('assignBtn');
+const assignedTable = document.getElementById('assignedTable');
+
+assignBtn.addEventListener("click", async () => {
+  const name = studentNameInput.value.trim();
+  const roll = studentRollInput.value.trim();
+  const semester = semesterSelect.value;
+  const subjects = Array.from(subjectSelect.selectedOptions).map(o => o.value);
+
+  if (!name || !roll || !semester || subjects.length === 0) {
+    return alert("Fill all fields");
+  }
+
+  try {
+    const res = await fetch("http://localhost:5000/api/admin/assign-student", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        name: name,
+        rollNo: roll,          // 🔥 Correct field for backend
+        semester: semester,
+        subjects: subjects
+      })
+    });
+
+    const data = await res.json();
+    alert(data.message);
+
+    if (data.success) loadAssignedStudents();
+
+  } catch (err) {
+    alert(err.message);
+  }
+});
+
+
+// Load assigned students
+function loadAssignedStudents() {
+  fetch("http://localhost:5000/api/admin/assigned-students", {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+    .then(res => res.json())
+    .then(data => {
+      assignedTable.innerHTML = "";
+
+      if (data.success && Array.isArray(data.assigned)) {
+        data.assigned.forEach(s => {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td>${s.rollNo}</td>
+    <td>${s.name}</td>
+    <td>${s.semester}</td>
+    <td>${s.subjects?.join(', ') || ''}</td>
+  `;
+  assignedTable.appendChild(tr);
+});
+
+      } else {
+        assignedTable.innerHTML = `<tr><td colspan="4">No assigned students found</td></tr>`;
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      assignedTable.innerHTML = `<tr><td colspan="4">Failed to load</td></tr>`;
+    });
+}
+
+// Initial load
+loadAssignedStudents();
+</script>
+
+</body>
+</html>

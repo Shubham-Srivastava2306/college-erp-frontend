@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Notices</title>
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+      <h2>Admin</h2>
+      <a href="admin-dashboard.html">Dashboard</a>
+      <a href="students.html">Manage Students</a>
+      <a href="faculty.html">Manage Faculty</a>
+      <a href="assign-subjects.html">Assign Subjects</a>
+      <a href="timetable.html">Manage Timetable</a>
+      <a class="active" href="notice.html">Manage Notices</a>
+      <a href="../login.html">Logout</a>
+  </div>
+
+  <!-- Main Content -->
+  <div class="content">
+      <h1>Manage Notices</h1>
+
+      <!-- Upload Notice Form -->
+      <div class="card">
+          <h3>Create New Notice</h3>
+          <form id="addNoticeForm">
+              <input type="text" id="title" placeholder="Title" required />
+              <textarea id="description" placeholder="Description" required></textarea>
+              <button type="submit">Add Notice</button>
+          </form>
+      </div>
+
+      <!-- Notices Table -->
+      <div class="card">
+          <h3>All Notices</h3>
+          <table>
+              <thead>
+                  <tr>
+                      <th>Title</th>
+                      <th>Description</th>
+                      <th>Actions</th>
+                  </tr>
+              </thead>
+              <tbody id="noticeTable">
+                  <!-- Notices will be loaded dynamically -->
+              </tbody>
+          </table>
+      </div>
+  </div>
+
+<script>
+const token = localStorage.getItem('token');
+const addNoticeForm = document.getElementById('addNoticeForm');
+const noticeTable = document.getElementById('noticeTable');
+
+// Load all notices
+async function loadNotices() {
+  try {
+    const res = await fetch('http://localhost:5000/api/admin/notice', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    noticeTable.innerHTML = '';
+    if(data.success){
+      data.notices.forEach(notice => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${notice.title}</td>
+          <td>${notice.description}</td>
+          <td>
+            <button class="delete" data-id="${notice._id}">Delete</button>
+          </td>
+        `;
+        noticeTable.appendChild(tr);
+      });
+      attachDeleteHandlers();
+    }
+  } catch (err) {
+    alert('Error loading notices: ' + err.message);
+  }
+}
+
+// Add new notice
+addNoticeForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  try {
+    const title = document.getElementById('title').value;
+    const description = document.getElementById('description').value;
+
+    const res = await fetch('http://localhost:5000/api/admin/add-notice', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ title, description })
+    });
+
+    const data = await res.json();
+    alert(data.message);
+    if(data.success){
+      addNoticeForm.reset();
+      loadNotices();
+    }
+  } catch (err) {
+    alert('Error adding notice: ' + err.message);
+  }
+});
+
+// Delete notice
+function attachDeleteHandlers() {
+  document.querySelectorAll('.delete').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.id;
+      if(confirm('Are you sure you want to delete this notice?')){
+        try {
+          const res = await fetch(`http://localhost:5000/api/admin/delete-notice/${id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const data = await res.json();
+          alert(data.message);
+          loadNotices();
+        } catch (err) {
+          alert('Error deleting notice: ' + err.message);
+        }
+      }
+    });
+  });
+}
+
+// Initial load
+loadNotices();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Dashboard</title>
+  <link rel="stylesheet" href="student.css" />
+  <style>student-info {
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+  font-size: 16px;
+  color: #2f3640;
+}
+.student-info p {
+  margin: 5px 0;
+}
+
+</style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>Student</h2>
+         
+        <a class="active" href="student-dashboard.html">Dashboard</a>
+        <a href="attendance.html">Attendance</a>
+        <a href="marks.html">Marks</a>
+        <a href="timetable.html">Timetable</a>
+        <a href="notices.html">Notices</a>
+        <a href="../login.html">Logout</a>
+    </div>
+    
+
+    <!-- Main Content -->
+    <div class="content">
+        <h1>Welcome, Student</h1>
+        <!-- Student Info -->
+  <div class="student-info">
+    <p><strong>Name:</strong> <span id="studentName">--</span></p>
+    <p><strong>Roll No:</strong> <span id="studentRoll">--</span></p>
+  </div>
+
+        <!-- Dashboard Cards -->
+        <div class="row">
+
+            <div class="card">
+                <h3>Attendance</h3>
+                <a href="attendance.html" class="btn">View Details</a>
+            </div>
+
+            <div class="card">
+                <h3>Marks</h3>
+                <a href="marks.html" class="btn">Open</a>
+            </div>
+
+            <div class="card">
+                <h3>Today's Classes</h3>
+                
+                <a href="timetable.html" class="btn">View Timetable</a>
+            </div>
+
+            <div class="card">
+                <h3>Latest Notice</h3>
+                
+                <a href="notices.html" class="btn">Read All</a>
+            </div>
+
+        </div>
+    </div>
+<script>
+  
+const token = localStorage.getItem("token");
+async function loadStudentInfo(){
+  try {
+    const res = await fetch("http://localhost:5000/api/student/profile", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if(data.success){
+      document.getElementById("studentName").textContent = data.student.name;
+      document.getElementById("studentRoll").textContent = data.student.rollNo;
+    } else {
+      document.getElementById("studentName").textContent = "Shubham Srivastava";
+      document.getElementById("studentRoll").textContent = "2200460100105";
+    }
+  } catch(err){
+    console.error("Error loading student info:", err);
+    // fallback hardcoded
+    document.getElementById("studentName").textContent = "Shubham Srivastava";
+    document.getElementById("studentRoll").textContent = "2200460100105";
+  }
+}
+
+loadStudentInfo();
+
+
+
+if(!token){
+  alert('Please login first!');
+  window.location.href='../login.html';
+}
+
+// Attendance card
+async function loadAttendance(){
+  try {
+    const res = await fetch('http://localhost:5000/api/student/attendance', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if(data.success && data.attendance.length > 0){
+      let totalPresent = 0, totalClasses = 0;
+      data.attendance.forEach(a => {
+        totalPresent += a.present;
+        totalClasses += a.total;
+      });
+      const percentage = ((totalPresent/totalClasses)*100).toFixed(0);
+      document.querySelector('.card:nth-child(1) .value').textContent = percentage + "%";
+    }
+  } catch(err){ console.error(err); }
+}
+
+// Marks card
+async function loadMarks(){
+  try {
+    const res = await fetch('http://localhost:5000/api/student/marks', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if(data.success && data.marks.length > 0){
+      document.querySelector('.card:nth-child(2) .value').textContent = "Grades Available";
+    } else {
+      document.querySelector('.card:nth-child(2) .value').textContent = "No Data";
+    }
+  } catch(err){ console.error(err); }
+}
+
+// Today’s classes card
+async function loadClasses(){
+  try {
+    const res = await fetch('http://localhost:5000/api/student/lectures/today', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    const ul = document.querySelector('.card:nth-child(3) ul');
+    ul.innerHTML = '';
+    if(data.success && data.lectures.length > 0){
+      data.lectures.forEach(l => {
+        const li = document.createElement('li');
+        li.textContent = `${l.time} - ${l.subject}`;
+        ul.appendChild(li);
+      });
+    } else {
+      ul.innerHTML = '<li>No classes today</li>';
+    }
+  } catch(err){ console.error(err); }
+}
+
+// Latest notice card
+async function loadNotice(){
+  try {
+    const res = await fetch('http://localhost:5000/api/notice/latest', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if(data.success && data.notice){
+      document.querySelector('.card:nth-child(4) p').textContent = data.notice.title;
+    }
+  } catch(err){ console.error(err); }
+}
+
+// Initial load
+loadAttendance();
+loadMarks();
+loadClasses();
+loadNotice();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student Chatbot</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background:#f5f6fa;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+#chatbox {
+  width:400px;
+  height:500px;
+  border:1px solid #ccc;
+  border-radius:10px;
+  padding:10px;
+  background:#fff;
+  display:flex;
+  flex-direction:column;
+}
+
+#messages {
+  flex:1;
+  overflow-y:auto;
+  margin-bottom:10px;
+  padding:5px;
+  display:flex;
+  flex-direction:column;
+}
+
+/* Student bubble (right aligned, WhatsApp green) */
+.student {
+  align-self: flex-end;
+  background:#d4f7dc;
+  color:#2e7d32;
+  margin:5px;
+  padding:8px 12px;
+  border-radius:16px 16px 0 16px;
+  max-width:70%;
+  word-wrap:break-word;
+}
+
+/* Bot bubble (left aligned, WhatsApp grey/blue) */
+.bot {
+  align-self: flex-start;
+  background:#e3e3ff;
+  color:#2f3640;
+  margin:5px;
+  padding:8px 12px;
+  border-radius:16px 16px 16px 0;
+  max-width:70%;
+  word-wrap:break-word;
+}
+
+/* Input row */
+#inputRow {
+  display:flex;
+}
+#userInput {
+  flex:1;
+  padding:8px;
+  border-radius:6px;
+  border:1px solid #ccc;
+  outline:none;
+}
+#sendBtn {
+  padding:8px 16px;
+  margin-left:5px;
+  background:#4c6ef5;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  transition:0.3s;
+}
+#sendBtn:hover {
+  background:#3b5bdb;
+}
+
+/* Scrollbar styling */
+#messages::-webkit-scrollbar { width:6px; }
+#messages::-webkit-scrollbar-thumb { background:#ccc; border-radius:3px; }
+</style>
+</head>
+<body>
+
+<div id="chatbox">
+  <div id="messages"></div>
+  <div id="inputRow">
+    <input type="text" id="userInput" placeholder="Ask about attendance or marks..." />
+    <button id="sendBtn">Send</button>
+  </div>
+</div>
+
+<script>
+const token = localStorage.getItem("token");
+
+document.getElementById("sendBtn").addEventListener("click", async () => {
+  const query = document.getElementById("userInput").value.trim();
+  if (!query) return;
+
+  addMessage("student", query);
+
+  let url = "";
+  // ✅ Intent detection
+  if (query.toLowerCase().includes("attendance")) {
+    if (query.toLowerCase().includes("total")) {
+      const subject = extractSubject(query);
+      url = `http://localhost:5000/api/student/attendance/overall?subject=${subject}`;
+    } else if (query.match(/\d{2}\s\w+/)) {
+      const date = parseDate(query);
+      url = `http://localhost:5000/api/student/attendance?date=${date}`;
+    } else {
+      const subject = extractSubject(query);
+      url = `http://localhost:5000/api/student/attendance?subject=${subject}`;
+    }
+  } else if (query.toLowerCase().includes("marks")) {
+    if (query.toLowerCase().includes("mid-term")) {
+      const subject = extractSubject(query);
+      url = `http://localhost:5000/api/student/marks/Mid-term/${subject}`;
+    } else if (query.toLowerCase().includes("assignment")) {
+      const subject = extractSubject(query);
+      url = `http://localhost:5000/api/student/marks/Assignment/${subject}`;
+    } else if (query.toLowerCase().includes("final")) {
+      const subject = extractSubject(query);
+      url = `http://localhost:5000/api/student/marks/Final Exam/${subject}`;
+    } else {
+      url = `http://localhost:5000/api/student/marks/overall`;
+    }
+  }
+
+  try {
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    addMessage("bot", formatResponse(query, data));
+  } catch (err) {
+    addMessage("bot", "Error fetching data");
+  }
+});
+
+function addMessage(sender, text) {
+  const msg = document.createElement("div");
+  msg.className = sender;
+  msg.textContent = text;
+  document.getElementById("messages").appendChild(msg);
+  document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
+}
+
+function extractSubject(query) {
+  const subjects = ["DBMS","Data Structures","OS","Maths"];
+  return subjects.find(s => query.toLowerCase().includes(s.toLowerCase())) || "";
+}
+
+function parseDate(query) {
+  // crude date parsing: "21 Nov" -> 2025-11-21
+  const parts = query.split(" ");
+  const day = parts[0];
+  const month = parts[1];
+  const year = new Date().getFullYear();
+  return `${year}-${month}-${day}`;
+}
+
+function formatResponse(query, data) {
+  if (query.toLowerCase().includes("attendance")) {
+    if (data.overall) {
+      return `📊 Overall Attendance: ${data.overall.percentage}%\n✅ Present: ${data.overall.present}\n❌ Absent: ${data.overall.absent}\n📅 Total: ${data.overall.total}`;
+    }
+    if (data.summary && data.summary.length) {
+      const s = data.summary[0];
+      return `📘 Subject: ${s.subject}\nAttendance: ${s.percentage}%\nPresent: ${s.present}, Absent: ${s.total - s.present}`;
+    }
+  }
+  if (query.toLowerCase().includes("marks")) {
+    if (data.overall) return `📊 Overall Marks Average: ${data.overall}`;
+    if (data.summary && data.summary.length) {
+      const s = data.summary[0];
+      return `📝 Marks for ${s.subject} (${s.examType}): ${s.average}\nObtained: ${s.obtained}`;
+    }
+  }
+  return "Sorry, I couldn't understand the response.";
+}
+</script>
+
+</body>
+</html>

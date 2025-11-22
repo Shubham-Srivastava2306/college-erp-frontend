@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Timetable</title>
+  <link rel="stylesheet" href="student.css" />
+
+  <style>
+    /* Page-Specific Styling */
+
+    .timetable-table {
+      margin-top: 20px;
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+
+    .timetable-table th {
+      background: #4c6ef5;
+      color: white;
+      padding: 12px;
+      text-align: left;
+      font-size: 15px;
+    }
+
+    .timetable-table td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+    }
+
+    .day-header {
+      background: #f1f3ff;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>Student</h2>
+        <a href="student-dashboard.html">Dashboard</a>
+        <a href="attendance.html">Attendance</a>
+        <a href="marks.html">Marks</a>
+        <a class="active" href="timetable.html">Timetable</a>
+        <a href="notices.html">Notices</a>
+        <a href="../index.html">Logout</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <h1>Your Timetable</h1>
+
+        <table class="timetable-table">
+            <thead>
+                <tr>
+                    <th>Day</th>
+                    <th>9:00 - 10:00</th>
+                    <th>10:00 - 11:00</th>
+                    <th>11:00 - 12:00</th>
+                    <th>12:00 - 1:00</th>
+                    <th>2:00 - 3:00</th>
+                    <th>3:00 - 4:00</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td class="day-header">Monday</td>
+                    <td>Data Structures</td>
+                    <td>OS</td>
+                    <td>CN</td>
+                    <td>Break</td>
+                    <td>DBMS</td>
+                    <td>Lab</td>
+                </tr>
+
+                <tr>
+                    <td class="day-header">Tuesday</td>
+                    <td>DBMS</td>
+                    <td>CN</td>
+                    <td>Maths</td>
+                    <td>Break</td>
+                    <td>Data Structures</td>
+                    <td>OS</td>
+                </tr>
+
+                <tr>
+                    <td class="day-header">Wednesday</td>
+                    <td>OS</td>
+                    <td>Maths</td>
+                    <td>DBMS</td>
+                    <td>Break</td>
+                    <td>CN</td>
+                    <td>Sports</td>
+                </tr>
+
+                <tr>
+                    <td class="day-header">Thursday</td>
+                    <td>CN</td>
+                    <td>Data Structures</td>
+                    <td>DBMS</td>
+                    <td>Break</td>
+                    <td>OS</td>
+                    <td>Library</td>
+                </tr>
+
+                <tr>
+                    <td class="day-header">Friday</td>
+                    <td>Maths</td>
+                    <td>DBMS</td>
+                    <td>CN</td>
+                    <td>Break</td>
+                    <td>Data Structures</td>
+                    <td>Mentor Meet</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+    </div>
+    
+
+</script>
+
+</body>
+</html>

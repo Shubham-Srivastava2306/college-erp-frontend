@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Attendance</title>
+<style>
+/* Reset and base */
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+body { display:flex; background:#f5f6fa; min-height:100vh; }
+
+/* Sidebar */
+.sidebar {
+  width:220px;
+  background:#2f3640;
+  color:white;
+  height:100vh;
+  position:fixed;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+}
+.sidebar h2 { text-align:center; margin-bottom:30px; font-size:24px; }
+.sidebar a { color:#fff; text-decoration:none; padding:10px 15px; margin:10px 0; border-radius:6px; transition:0.3s; }
+.sidebar a:hover { background:#4c6ef5; }
+.sidebar a.active { background:#4c6ef5; }
+
+/* Main content */
+.container { margin-left:240px; padding:30px; flex:1; }
+h1 { margin-bottom:20px; color:#2f3640; }
+label { font-weight:600; margin-right:5px; }
+input { padding:8px 12px; margin-right:10px; margin-bottom:15px; border-radius:6px; border:1px solid #ccc; outline:none; transition:0.3s; }
+input:focus { border-color:#4c6ef5; }
+button { padding:8px 16px; background:#4c6ef5; color:white; border:none; border-radius:6px; cursor:pointer; transition:0.3s; }
+button:hover { background:#3b5bdb; }
+
+/* Overall Box */
+.overall-box { margin:20px 0; padding:15px; background:#fff; border-radius:10px; font-weight:bold; font-size:18px; box-shadow:0 2px 8px rgba(0,0,0,0.1); color:#2f3640; }
+
+/* Cards container */
+.cards { display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:20px; margin-top:20px; }
+
+/* Summary & Record Card */
+.card {
+  background:#fff;
+  border-radius:10px;
+  padding:15px;
+  box-shadow:0 3px 10px rgba(0,0,0,0.1);
+}
+.card h3 { margin-bottom:10px; font-size:16px; color:#2f3640; }
+.card p { margin-bottom:5px; }
+.progress { background:#e0e0e0; height:12px; border-radius:6px; overflow:hidden; margin-top:5px; }
+.progress-bar { height:12px; background:#4c6ef5; width:0%; transition:width 0.5s; border-radius:6px; }
+
+/* Badge */
+.badge { padding:5px 10px; border-radius:6px; font-weight:600; display:inline-block; text-transform:capitalize; }
+.present { background:#d4f7dc; color:#2e7d32; }
+.absent { background:#ffe3e3; color:#c62828; }
+
+/* Chatbot bubble */
+#chatbotBubble {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #4c6ef5;
+  color: #fff;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  cursor:pointer;
+  box-shadow:0 2px 6px rgba(0,0,0,0.2);
+  font-size:24px;
+}
+
+#chatbotWindow {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  width: 300px;
+  height: 420px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background: #fff;
+  display: none;
+  flex-direction: column;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  overflow: hidden;
+}
+#chatSuggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 5px;
+  border-bottom: 1px solid #eee;
+  background: #f9f9ff;
+  z-index: 1;
+}
+
+#chatMessages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100% - 90px); /* Adjusted height to leave space for suggestions + input */
+}
+#chatInputRow {
+  display: flex;
+  padding: 5px;
+  border-top: 1px solid #eee;
+  background: #fff;
+}
+.student {
+  align-self:flex-end;
+  background:#d4f7dc;
+  color:#2e7d32;
+  margin:5px;
+  padding:8px 12px;
+  border-radius:16px 16px 0 16px;
+  max-width:70%;
+}
+
+.bot {
+  align-self:flex-start;
+  background:#e3e3ff;
+  color:#2f3640;
+  margin:5px;
+  padding:8px 12px;
+  border-radius:16px 16px 16px 0;
+  max-width:70%;
+}
+
+#chatInputRow { display:flex; padding:5px; }
+#chatUserInput { flex:1; padding:8px; border:1px solid #ccc; border-radius:6px; }
+#chatSendBtn { margin-left:5px; padding:8px 12px; background:#4c6ef5; color:#fff; border:none; border-radius:6px; cursor:pointer; }
+#chatSendBtn:hover { background:#3b5bdb; }
+
+/* Responsive */
+@media screen and (max-width:768px){
+  .sidebar{width:60px; padding:10px;}
+  .sidebar h2{display:none;}
+  .container{margin-left:60px;padding:20px;}
+  input, button{width:100%; margin-bottom:10px;}
+}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <h2>Student</h2>
+  <a href="student-dashboard.html">Dashboard</a>
+  <a class="active" href="#">Attendance</a>
+  <a href="marks.html">Marks</a>
+  <a href="timetable.html">Timetable</a>
+  <a href="notices.html">Notices</a>
+  <a href="../login.html">Logout</a>
+</div>
+
+<div class="container">
+  <h1>Attendance</h1>
+
+  <label>Subject (optional):</label>
+  <input type="text" id="subjectInput" placeholder="Enter Subject e.g. DBMS" />
+  <button id="loadBtn">Load Attendance</button>
+
+  <div class="overall-box" id="overallBox">Overall Attendance: --</div>
+
+  <h2>Summary</h2>
+  <div class="cards" id="summaryCards">
+    <p>No data loaded</p>
+  </div>
+
+  <h2>Daily Records</h2>
+  <div class="cards" id="recordsCards">
+    <p>No data loaded</p>
+  </div>
+</div>
+
+<!-- Chatbot bubble + window -->
+<div id="chatbotBubble">💬</div>
+<div id="chatbotWindow">
+  <div id="chatMessages"></div>
+  <div id="chatSuggestions">
+    <button onclick="setQuery('Show my total attendance')">Total Attendance</button>
+    <button onclick="setQuery('Show my DBMS attendance')">DBMS Attendance</button>
+    <button onclick="setQuery('Attendance on 21 Nov')">Attendance on Date</button>
+  </div>
+  <div id="chatInputRow">
+    <input type="text" id="chatUserInput" placeholder="Ask about attendance or marks..." />
+    <button id="chatSendBtn">Send</button>
+  </div>
+</div>
+
+<script>
+const token = localStorage.getItem("token");
+
+// Attendance fetch logic
+document.getElementById("loadBtn").addEventListener("click", async () => {
+  const subject = document.getElementById("subjectInput").value.trim();
+  let url = `http://localhost:5000/api/student/attendance`;
+  if(subject) url += `?subject=${subject}`;
+  try {
+    const res = await fetch(url, { headers:{ Authorization:`Bearer ${token}` }});
+    const data = await res.json();
+
+    // Overall Box
+    const overallBox = document.getElementById("overallBox");
+    if (data.overall) {
+      const { present = 0, absent = 0, total = 0, percentage = 0 } = data.overall;
+      overallBox.innerHTML = `
+        Overall Attendance: <strong>${percentage}%</strong><br/>
+        Present: <strong>${present}</strong> | Absent: <strong>${absent}</strong> | Total: <strong>${total}</strong>
+      `;
+    } else {
+      overallBox.textContent = "Overall Attendance: --";
+    }
+
+    // Summary Cards
+    const summaryCards = document.getElementById("summaryCards");
+    summaryCards.innerHTML = "";
+    if(data.summary && data.summary.length){
+      data.summary.forEach(s=>{
+        const present = s.present || 0;
+        const absent = s.total ? s.total - present : 0;
+        const percent = Math.round(s.percentage || 0);
+        const card = document.createElement("div");
+        card.className="card";
+        card.innerHTML = `
+          <h3>${s.subject}</h3>
+          <p>Present: ${present}</p>
+          <p>Absent: ${absent}</p>
+          <p>Total: ${s.total || 0}</p>
+          <div class="progress">
+            <div class="progress-bar" style="width:${percent}%;"></div>
+          </div>
+          <p>${percent}% Attendance</p>
+        `;
+        summaryCards.appendChild(card);
+      });
+    } else {
+      summaryCards.innerHTML = "<p>No data loaded</p>";
+    }
+
+    // Daily Records Cards
+    const recordsCards = document.getElementById("recordsCards");
+    recordsCards.innerHTML = "";
+    if(data.records && data.records.length){
+      data.records.forEach(r=>{
+        const card = document.createElement("div");
+        card.className="card";
+        card.innerHTML = `
+          <h3>${r.date}</h3>
+          <p>Subject: ${r.subject}</p>
+          <p>Status: ${r.status}</p>
+        `;
+        recordsCards.appendChild(card);
+      });
+    } else {
+      recordsCards.innerHTML = "<p>No data loaded</p>";
+    }
+  } catch (err) {
+    alert("Error loading attendance data");
+  }
+});
+
+// Chatbot toggle logic
+const chatbotBubble = document.getElementById("chatbotBubble");
+const chatbotWindow = document.getElementById("chatbotWindow");
+chatbotBubble.addEventListener("click", () => {
+  if(chatbotWindow.style.display === "block"){
+    chatbotWindow.style.display = "none";
+  } else {
+    chatbotWindow.style.display = "block";
+  }
+});
+
+// Chatbot send button logic
+document.getElementById("chatSendBtn").addEventListener("click", async () => {
+  const query = document.getElementById("chatUserInput").value.trim();
+  if(!query) return;
+
+  addChatMessage("student", query);
+
+  try {
+    const res = await fetch("http://localhost:5000/api/student/chatbot", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ query })
+    });
+    const data = await res.json();
+    addChatMessage("bot", data.reply || "Sorry, I didn't understand.");
+  } catch (err) {
+    addChatMessage("bot", "Error fetching chatbot response");
+  }
+  document.getElementById("chatUserInput").value = "";
+});
+
+function addChatMessage(sender, text) {
+  const msg = document.createElement("div");
+  msg.className = sender;
+  msg.textContent = text;
+  document.getElementById("chatMessages").appendChild(msg);
+  document.getElementById("chatMessages").scrollTop = document.getElementById("chatMessages").scrollHeight;
+}
+</script>
+
+</body>
+</html>

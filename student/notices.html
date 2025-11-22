@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Notices</title>
+  <link rel="stylesheet" href="student.css" />
+
+  <style>
+    .notice-card {
+      background: white;
+      padding: 18px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .notice-card h3 {
+      margin: 0;
+      font-size: 18px;
+      color: #4c6ef5;
+    }
+
+    .notice-card p {
+      margin: 8px 0;
+      font-size: 14px;
+      color: #444;
+    }
+
+    .notice-date {
+      font-size: 13px;
+      color: #777;
+      margin-bottom: 10px;
+    }
+
+    .download-btn {
+      background: #4c6ef5;
+      color: white;
+      padding: 8px 14px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>Student</h2>
+        <a href="student-dashboard.html">Dashboard</a>
+        <a href="attendance.html">Attendance</a>
+        <a href="marks.html">Marks</a>
+        <a href="timetable.html">Timetable</a>
+        <a class="active" href="notices.html">Notices</a>
+        <a href="../index.html">Logout</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <h1>Notices</h1>
+
+        <!-- Notice 1 -->
+        <div class="notice-card">
+            <h3>Holiday Notice</h3>
+            <p class="notice-date">Published: 18 Nov 2025</p>
+            <p>College will remain closed tomorrow due to administrative reasons.</p>
+            <a href="#" class="download-btn">View File</a>
+        </div>
+
+        <!-- Notice 2 -->
+        <div class="notice-card">
+            <h3>Mid-Term Exam Schedule</h3>
+            <p class="notice-date">Published: 15 Nov 2025</p>
+            <p>Mid-term exams will begin from next week. Students are advised to prepare well.</p>
+            <a href="#" class="download-btn">View File</a>
+        </div>
+
+        <!-- Notice 3 -->
+        <div class="notice-card">
+            <h3>Project Submission Deadline</h3>
+            <p class="notice-date">Published: 10 Nov 2025</p>
+            <p>Submit your project report before the deadline. Late submissions will not be accepted.</p>
+            <a href="#" class="download-btn">Download Attachment</a>
+        </div>
+
+    </div>
+<script>
+const token = localStorage.getItem('token');
+if(!token){
+  alert('Please login first!');
+  window.location.href='../login.html';
+}
+
+const noticeContainer = document.querySelector('.content');
+
+// Load notices dynamically
+async function loadNotices(){
+  try{
+    const res = await fetch('http://localhost:5000/api/notice', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+
+    // Remove static notices
+    noticeContainer.innerHTML = '<h1>Notices</h1>';
+
+    if(data.success && data.notices.length > 0){
+      data.notices.forEach(n => {
+        const div = document.createElement('div');
+        div.className = 'notice-card';
+        div.innerHTML = `
+          <h3>${n.title}</h3>
+          <p class="notice-date">Published: ${new Date(n.createdAt).toLocaleDateString()}</p>
+          <p>${n.description}</p>
+          ${n.fileUrl ? `<a href="${n.fileUrl}" target="_blank" class="download-btn">View File</a>` : ''}
+        `;
+        noticeContainer.appendChild(div);
+      });
+    } else {
+      noticeContainer.innerHTML += '<p>No notices found.</p>';
+    }
+  }catch(err){
+    alert('Error loading notices: ' + err.message);
+  }
+}
+
+loadNotices();
+</script>
+
+</body>
+</html>

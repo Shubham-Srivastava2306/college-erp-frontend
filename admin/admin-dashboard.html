@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - College ERP</title>
+   <link rel="stylesheet" href="admin.css" />
+</head>
+
+<body class="dashboard-body">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>Admin Panel</h2>
+
+        <a href="admin-dashboard.html" class="active">Dashboard</a>
+        <a href="students.html">Manage Students</a>
+        <a href="faculty.html">Manage Faculty</a>
+        <a href="assign-subjects.html">Assign Subjects</a>
+        <a href="timetable.html">Manage Timetable</a>
+        <a href="notice.html">Upload Notices</a>
+
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+
+        <div class="header">
+            <h1>Welcome, Admin</h1>
+        </div>
+
+        <!-- Dashboard Cards -->
+        <div class="cards-container">
+
+            <div class="card" onclick="location.href='students.html'">
+    <h3>Total Students</h3>
+    <p id="studentCount">120</p>
+</div>
+
+<div class="card" onclick="location.href='faculty.html'">
+    <h3>Total Faculty</h3>
+    <p id="facultyCount">25</p>
+</div>
+
+<div class="card" onclick="location.href='timetable.html'">
+    <h3>Manage Timetable</h3>
+    <p>Click to edit</p>
+</div>
+
+<div class="card" onclick="location.href='notice.html'">
+    <h3>Notices</h3>
+    <p>Upload / Manage Notices</p>
+</div>
+
+
+    
+
+    </div>
+
+    <script>
+        function logout() {
+            alert("Logged out!");
+           window.location.href = "../login.html";
+
+        }
+    </script>
+
+</body>
+</html>

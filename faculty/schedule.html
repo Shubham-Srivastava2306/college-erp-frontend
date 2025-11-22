@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lecture Schedule</title>
+  <link rel="stylesheet" href="faculty.css">
+
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+
+    th {
+      background: #4c6ef5;
+      color: white;
+      padding: 12px;
+      text-align: left;
+      font-size: 15px;
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>Faculty</h2>
+        <a href="faculty-dashboard.html">Dashboard</a>
+        <a href="attendance.html">Mark Attendance</a>
+        <a href="marks-upload.html">Upload Marks</a>
+        <a class="active" href="schedule.html">Lecture Schedule</a>
+        <a href="notices.html">Notices</a>
+        <a href="../login.html">Logout</a>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+        <h1>Your Lecture Schedule</h1>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Day</th>
+                    <th>Time</th>
+                    <th>Subject</th>
+                    <th>Class / Semester</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td>Monday</td>
+                    <td>10:00 AM - 11:00 AM</td>
+                    <td>Data Structures</td>
+                    <td>CS - Sem 3</td>
+                </tr>
+
+                <tr>
+                    <td>Monday</td>
+                    <td>02:00 PM - 03:00 PM</td>
+                    <td>DBMS</td>
+                    <td>CS - Sem 4</td>
+                </tr>
+
+                <tr>
+                    <td>Tuesday</td>
+                    <td>11:00 AM - 12:00 PM</td>
+                    <td>Operating Systems</td>
+                    <td>CS - Sem 3</td>
+                </tr>
+
+                <tr>
+                    <td>Wednesday</td>
+                    <td>01:00 PM - 02:00 PM</td>
+                    <td>Computer Networks</td>
+                    <td>CS - Sem 5</td>
+                </tr>
+
+                <tr>
+                    <td>Thursday</td>
+                    <td>09:00 AM - 10:00 AM</td>
+                    <td>DBMS</td>
+                    <td>CS - Sem 4</td>
+                </tr>
+
+                <tr>
+                    <td>Friday</td>
+                    <td>12:00 PM - 01:00 PM</td>
+                    <td>Data Structures</td>
+                    <td>CS - Sem 3</td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+<script>
+const token = localStorage.getItem('token');
+if(!token){
+    alert('Please login first!');
+    window.location.href='../login.html';
+}
+
+const scheduleTableBody = document.querySelector('tbody');
+
+async function loadSchedule(){
+    try{
+        const res = await fetch('http://localhost:5000/api/faculty/lectures', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        scheduleTableBody.innerHTML = '';
+        if(data.success && data.lectures.length>0){
+            data.lectures.forEach(l=>{
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${l.day}</td>
+                    <td>${l.time}</td>
+                    <td>${l.subject}</td>
+                    <td>${l.course} - Sem ${l.semester}</td>
+                `;
+                scheduleTableBody.appendChild(tr);
+            });
+        } else {
+            scheduleTableBody.innerHTML = '<tr><td colspan="4">No lectures scheduled.</td></tr>';
+        }
+    } catch(err){
+        alert('Error loading schedule: '+err.message);
+    }
+}
+
+loadSchedule();
+</script>
+
+</body>
+</html>

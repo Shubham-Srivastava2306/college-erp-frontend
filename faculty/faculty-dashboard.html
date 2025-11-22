@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Faculty Dashboard</title>
+  <link rel="stylesheet" href="faculty.css">
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>Faculty</h2>
+        <a class="active" href="faculty-dashboard.html">Dashboard</a>
+        <a href="attendance.html">Mark Attendance</a>
+        <a href="marks-upload.html">Upload Marks</a>
+        <a href="schedule.html">Lecture Schedule</a>
+        <a href="notices.html">Notices</a>
+        <a href="../login.html">Logout</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <h1>Welcome, <span id="facultyName">Faculty</span></h1>
+        <p>Select an option to continue:</p>
+
+        <div class="cards">
+
+            <div class="card" onclick="location.href='attendance.html'">
+                <h3>📘 Mark Attendance</h3>
+                <p>Manage student attendance records</p>
+            </div>
+
+            <div class="card" onclick="location.href='marks-upload.html'">
+                <h3>📊 Upload Marks</h3>
+                <p>Submit internal & final exam marks</p>
+            </div>
+
+            <div class="card" onclick="location.href='schedule.html'">
+                <h3>📅 Lecture Schedule</h3>
+                <p>View your timetable & lecture plan</p>
+            </div>
+
+            <div class="card" onclick="location.href='notices.html'">
+                <h3>📢 Notices</h3>
+                <p>Read official announcements</p>
+            </div>
+
+        </div>
+
+    </div>
+<script>
+const token = localStorage.getItem("token");
+
+async function loadFacultyName(){
+  try {
+    const res = await fetch("http://localhost:5000/api/faculty/profile", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if(data.success){
+      document.getElementById("facultyName").textContent = data.faculty.name;
+    } else {
+      document.getElementById("facultyName").textContent = "Faculty";
+    }
+  } catch(err){
+    console.error("Error loading faculty name:", err);
+    document.getElementById("facultyName").textContent = "Faculty";
+  }
+}
+
+loadFacultyName();
+</script>
+</body>
+</html>

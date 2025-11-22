@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timetable Management</title>
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+      <h2>Admin</h2>
+      <a href="admin-dashboard.html">Dashboard</a>
+      <a href="students.html">Manage Students</a>
+      <a href="faculty.html">Manage Faculty</a>
+      <a href="assign-subjects.html">Assign Subjects</a>
+      <a class="active" href="timetable.html">Manage Timetable</a>
+      <a href="notice.html">Manage Notices</a>
+      <a href="../login.html">Logout</a>
+  </div>
+
+  <!-- Main Content -->
+  <div class="content">
+      <h1>Manage Timetable</h1>
+
+      <!-- Add Lecture Form -->
+      <div class="card">
+          <h3>Add Lecture</h3>
+          <form id="lectureForm">
+            <select id="semesterSelect" required>
+  <option value="" disabled selected>Select Semester</option>
+  <option>1</option>
+  <option>2</option>
+  <option>3</option>
+  <option>4</option>
+  <option>5</option>
+  <option>6</option>
+  <option>7</option>
+  <option>8</option>
+</select>
+
+<input type="text" id="courseInput" placeholder="Course" required />
+
+              <select id="facultySelect" required>
+                  <option value="" disabled selected>Select Faculty</option>
+              </select>
+
+              <input type="text" id="subjectInput" placeholder="Subject" required />
+              <select id="daySelect" required>
+                  <option value="" disabled selected>Select Day</option>
+                  <option>Monday</option>
+                  <option>Tuesday</option>
+                  <option>Wednesday</option>
+                  <option>Thursday</option>
+                  <option>Friday</option>
+              </select>
+
+              <input type="time" id="timeInput" required />
+
+              <button type="submit">Add to Timetable</button>
+          </form>
+      </div>
+
+      <!-- Timetable Table -->
+      <div class="card">
+          <h3>Weekly Timetable</h3>
+          <table>
+              <thead>
+                  <tr>
+                      <th>Faculty</th>
+                      <th>Subject</th>
+                      <th>Day</th>
+                      <th>Time</th>
+                      <th>Actions</th>
+                  </tr>
+              </thead>
+              <tbody id="timetableTable">
+                  <!-- Timetable rows will be loaded dynamically -->
+              </tbody>
+          </table>
+      </div>
+  </div>
+
+<script>
+const token = localStorage.getItem('token');
+if (!token) {
+    alert('Please login first!');
+    window.location.href = '../login.html';
+}
+
+const lectureForm = document.getElementById('lectureForm');
+const timetableTable = document.getElementById('timetableTable');
+const facultySelect = document.getElementById('facultySelect');
+
+// Load faculty for dropdown
+async function loadFaculty() {
+    try {
+        const res = await fetch('http://localhost:5000/api/admin/all-faculty', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Failed to fetch faculty');
+        const data = await res.json();
+        facultySelect.innerHTML = '<option value="" disabled selected>Select Faculty</option>';
+        data.faculty.forEach(f => {
+            const option = document.createElement('option');
+            option.value = f._id;
+            option.textContent = f.name;
+            facultySelect.appendChild(option);
+        });
+    } catch (err) {
+        alert('Error loading faculty: ' + err.message);
+    }
+}
+
+// Load timetable
+async function loadTimetable() {
+    try {
+        const res = await fetch('http://localhost:5000/api/admin/all-timetable', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Failed to fetch timetable');
+        const data = await res.json();
+        timetableTable.innerHTML = '';
+
+        if (!data.success || !data.data) return;
+
+        data.data.forEach(t => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${t.facultyName}</td>
+                <td>${t.subject}</td>
+                <td>${t.day}</td>
+                <td>${t.time}</td>
+                <td>
+                    <button class="delete" data-id="${t._id}">Delete</button>
+                </td>
+            `;
+            timetableTable.appendChild(tr);
+        });
+
+        attachDeleteHandlers();
+    } catch (err) {
+        alert('Error loading timetable: ' + err.message);
+    }
+}
+
+// Add lecture
+lectureForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    try {
+        const facultyId = facultySelect.value;
+        const facultyName = facultySelect.options[facultySelect.selectedIndex].text;
+        const subject = document.getElementById('subjectInput').value;
+        const day = document.getElementById('daySelect').value;
+        const time = document.getElementById('timeInput').value;
+
+        const semester = document.getElementById('semesterSelect').value;
+const course = document.getElementById('courseInput').value;
+
+const res = await fetch('http://localhost:5000/api/admin/add-timetable', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`
+  },
+  body: JSON.stringify({ facultyId, facultyName, subject, day, time, semester, course })
+});
+
+
+        if (!res.ok) throw new Error('Failed to add lecture');
+        const data = await res.json();
+        alert(data.message);
+        if (data.success) {
+            lectureForm.reset();
+            loadTimetable();
+        }
+    } catch (err) {
+        alert('Error adding lecture: ' + err.message);
+    }
+});
+
+// Delete lecture
+function attachDeleteHandlers() {
+    document.querySelectorAll('.delete').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const id = btn.dataset.id;
+            if (!confirm('Are you sure you want to delete this lecture?')) return;
+
+            try {
+                const res = await fetch(`http://localhost:5000/api/admin/delete-timetable/${id}`, {
+                    method: 'DELETE',
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                if (!res.ok) throw new Error('Failed to delete lecture');
+                const data = await res.json();
+                alert(data.message);
+                loadTimetable();
+            } catch (err) {
+                alert('Error deleting lecture: ' + err.message);
+            }
+        });
+    });
+}
+
+// Initial load
+loadFaculty();
+loadTimetable();
+
+</script>
+
+</body>
+</html>

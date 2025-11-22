@@ -1,0 +1,174 @@
+/* --------- Global Styles --------- */
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background: #f4f6f9;
+  display: flex;
+}
+
+/* --------- Sidebar --------- */
+.sidebar {
+  width: 240px;
+  background: #1e1f26;
+  color: white;
+  height: 100vh;
+  position: fixed;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.sidebar h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 22px;
+  letter-spacing: 1px;
+}
+
+.sidebar a {
+  display: block;
+  padding: 12px 15px;
+  margin: 5px 0;
+  color: #ddd;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: 0.2s;
+}
+
+.sidebar a:hover {
+  background: #333544;
+  color: #fff;
+}
+
+.sidebar a.active {
+  background: #4c6ef5;
+  color: #fff;
+}
+
+/* --------- Main Content --------- */
+.content {
+  margin-left: 260px;
+  padding: 20px;
+  width: calc(100% - 260px);
+}
+
+h1 {
+  margin-top: 0;
+  font-size: 28px;
+  color: #222;
+}
+
+/* --------- Cards --------- */
+.card {
+  background: white;
+  padding: 20px;
+  margin: 20px 0;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.card h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 20px;
+}
+
+/* --------- Forms --------- */
+form input,
+form select {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0 15px 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+form button {
+  background: #4c6ef5;
+  color: white;
+  padding: 12px 18px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+form button:hover {
+  background: #3b5bdb;
+}
+
+/* --------- Table --------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+table th {
+  background: #4c6ef5;
+  color: white;
+  padding: 12px;
+  text-align: left;
+  font-size: 15px;
+}
+
+table td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  font-size: 14px;
+}
+
+table tr:hover {
+  background: #f1f3f5;
+}
+
+/* --------- Table Action Buttons --------- */
+button.edit,
+button.delete {
+  padding: 6px 12px;
+  font-size: 13px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button.edit {
+  background: #ffa94d;
+  color: white;
+}
+
+button.edit:hover {
+  background: #f08c00;
+}
+
+button.delete {
+  background: #ff6b6b;
+  color: white;
+}
+
+button.delete:hover {
+  background: #d63031;
+}
+
+/* --------- Responsive (Mobile) --------- */
+@media (max-width: 768px) {
+  .sidebar {
+      width: 200px;
+  }
+  .content {
+      margin-left: 220px;
+      width: calc(100% - 220px);
+  }
+}
+
+@media (max-width: 600px) {
+  .sidebar {
+      position: relative;
+      width: 100%;
+      height: auto;
+  }
+  .content {
+      margin-left: 0;
+      width: 100%;
+  }
+}
