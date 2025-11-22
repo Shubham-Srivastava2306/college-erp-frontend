@@ -39,66 +39,63 @@
   </div>
 
   <script>
-  const roleSelect = document.getElementById("role");
-  const emailFields = document.getElementById("emailFields");
-  const rollFields = document.getElementById("rollFields");
+    const roleSelect = document.getElementById("role");
+    const emailFields = document.getElementById("emailFields");
+    const rollFields = document.getElementById("rollFields");
 
-  roleSelect.addEventListener("change", () => {
-    if (roleSelect.value === "student") {
-      emailFields.classList.add("hidden");
-      rollFields.classList.remove("hidden");
-    } else {
-      rollFields.classList.add("hidden");
-      emailFields.classList.remove("hidden");
-    }
-  });
-
-  const form = document.getElementById("loginForm");
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  let body = { role: roleSelect.value };
-
-  if (roleSelect.value === "student") {
-    body.rollNo = document.getElementById("rollNo").value;
-    body.password = document.getElementById("passwordRoll").value;
-  } else {
-    body.email = document.getElementById("email").value;
-    body.password = document.getElementById("passwordEmail").value;
-  }
-
-  try {
-    const res = await fetch("https://college-erp-backend-pfx4.onrender.com/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
+    roleSelect.addEventListener("change", () => {
+      if (roleSelect.value === "student") {
+        emailFields.classList.add("hidden");
+        rollFields.classList.remove("hidden");
+      } else {
+        rollFields.classList.add("hidden");
+        emailFields.classList.remove("hidden");
+      }
     });
 
-    if (!res.ok) {
-      throw new Error(`Server responded with ${res.status}`);
-    }
+    const form = document.getElementById("loginForm");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-    const data = await res.json();
+      let body = { role: roleSelect.value };
 
-    if (data.success) {
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.role);
-      localStorage.setItem("userId", data.user.id);
+      if (roleSelect.value === "student") {
+        body.rollNo = document.getElementById("rollNo").value;
+        body.password = document.getElementById("passwordRoll").value;
+      } else {
+        body.email = document.getElementById("email").value;
+        body.password = document.getElementById("passwordEmail").value;
+      }
 
-      if (data.role === "admin") window.location.href = "admin/admin-dashboard.html";
-      if (data.role === "faculty") window.location.href = "faculty/faculty-dashboard.html";
-      if (data.role === "student") window.location.href = "student/student-dashboard.html";
-    } else {
-      alert(data.message || "Login failed");
-    }
-  } catch (err) {
-    console.error("Login error:", err);
-    alert("Unable to connect to server. Please try again later.");
-  }
-});
+      try {
+        const res = await fetch("https://college-erp-backend-pfx4.onrender.com/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
 
+        if (!res.ok) {
+          throw new Error(`Server responded with ${res.status}`);
+        }
 
-  
-</script>
+        const data = await res.json();
+
+        if (data.success) {
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("role", data.role);
+          localStorage.setItem("userId", data.user.id);
+
+          if (data.role === "admin") window.location.href = "admin/admin-dashboard.html";
+          if (data.role === "faculty") window.location.href = "faculty/faculty-dashboard.html";
+          if (data.role === "student") window.location.href = "student/student-dashboard.html";
+        } else {
+          alert(data.message || "Login failed");
+        }
+      } catch (err) {
+        console.error("Login error:", err);
+        alert("Unable to connect to server. Please try again later.");
+      }
+    });
+  </script>
 </body>
 </html>
