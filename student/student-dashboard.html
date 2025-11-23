@@ -82,17 +82,17 @@ async function loadStudentInfo(){
       headers: { Authorization: `Bearer ${token}` }
     });
     const data = await res.json();
-    if(data.success){
+    if(data.success && data.student){
       document.getElementById("studentName").textContent = data.student.name;
       document.getElementById("studentRoll").textContent = data.student.rollNo;
     } else {
-      document.getElementById("studentName").textContent = "Shubham Srivastava";
-      document.getElementById("studentRoll").textContent = "2200460100105";
+      document.getElementById("studentName").textContent = "--";
+      document.getElementById("studentRoll").textContent = "--";
     }
   } catch(err){
     console.error("Error loading student info:", err);
-    document.getElementById("studentName").textContent = "Shubham Srivastava";
-    document.getElementById("studentRoll").textContent = "2200460100105";
+    document.getElementById("studentName").textContent = "--";
+    document.getElementById("studentRoll").textContent = "--";
   }
 }
 
@@ -100,6 +100,8 @@ if(!token){
   alert('Please login first!');
   window.location.href='../index.html';
 }
+
+loadStudentInfo();
 
 // Attendance card
 async function loadAttendance(){
